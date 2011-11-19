@@ -1,0 +1,6 @@
+Jarvis
+A simple chatbot written in Python.
+
+Requirements:
+- xmpp
+
