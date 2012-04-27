@@ -95,8 +95,8 @@
     <component name="jsgfGrammar" type="edu.cmu.sphinx.jsgf.JSGFGrammar">
         <property name="dictionary" value="dictionary"/>
         <property name="grammarLocation"
-             value="resource:/edu/cmu/sphinx/"/>
-        <property name="grammarName" value="hello"/>
+             value="src/resources/grammar/"/>
+        <property name="grammarName" value="jarvis"/>
 	<property name="logMath" value="logMath"/>
     </component>
 
