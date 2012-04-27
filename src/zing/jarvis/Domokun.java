@@ -14,10 +14,10 @@ public class Domokun
 {
 	public static void main(String[] argv)
 	{
-		zing.jarvis.SpeechInterface.init("../../../lib", true, false, "", "");
+		edu.cmu.sphinx.SpeechInterface.init("../../../lib", true, false, "", "");
 
-		zing.jarvis.SpeechInterface.synthesize("This is a speech synthesis test.");
-		zing.jarvis.SpeechInterface.synthesize("Type a message to hear it spoken " 
+		edu.cmu.sphinx.SpeechInterface.synthesize("This is a speech synthesis test.");
+		edu.cmu.sphinx.SpeechInterface.synthesize("Type a message to hear it spoken " 
 			+ "aloud.");
 
 		System.out.println("This is a speech synthesis test.  " 
@@ -38,12 +38,12 @@ public class Domokun
 
 				if (s.equals("s"))
 				{
-					zing.jarvis.SpeechInterface.stopSynthesizing();
+					edu.cmu.sphinx.SpeechInterface.stopSynthesizing();
 				}
 				else
 				{
 					// Speak what was typed.
-					zing.jarvis.SpeechInterface.synthesize(s);
+					edu.cmu.sphinx.SpeechInterface.synthesize(s);
 				}
 			}
 		}
@@ -52,7 +52,7 @@ public class Domokun
 			System.out.println( "IO error:" + ioe );
 		}
 
-		zing.jarvis.SpeechInterface.destroy();
+		edu.cmu.sphinx.SpeechInterface.destroy();
 		System.exit(0);
 	}
 }

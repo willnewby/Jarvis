@@ -31,7 +31,7 @@ public class recognitionTest
 {
 	public static void main(String[] argv)
 	{
-		zing.jarvis.SpeechInterface.init("lib", false, true, 
+		edu.cmu.sphinx.SpeechInterface.init("lib", false, true, 
 			"./grammar", "digits");
 
 		System.out.println("This is a speech recognition test. " 
@@ -51,9 +51,9 @@ public class recognitionTest
 			{
 			}
 
-			while (zing.jarvis.SpeechInterface.getRecognizerQueueSize() > 0)
+			while (edu.cmu.sphinx.SpeechInterface.getRecognizerQueueSize() > 0)
 			{
-				String s = zing.jarvis.SpeechInterface.popRecognizedString();
+				String s = edu.cmu.sphinx.SpeechInterface.popRecognizedString();
 
 				// Check if the string contains 'quit'.
 				if (-1 != s.indexOf("quit"))
@@ -66,7 +66,7 @@ public class recognitionTest
 			}
 		}
 
-		zing.jarvis.SpeechInterface.destroy();
+		edu.cmu.sphinx.SpeechInterface.destroy();
 		System.exit(0);
 	}
 }

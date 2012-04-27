@@ -23,7 +23,7 @@
  *                                                                       *
  *************************************************************************/ 
 
-package zing.jarvis;
+package edu.cmu.sphinx;
 
 import java.util.Locale;
 import javax.speech.EngineList;
@@ -31,12 +31,18 @@ import javax.speech.EngineCreate;
 import javax.speech.synthesis.Synthesizer;
 import javax.speech.synthesis.SynthesizerModeDesc;
 import javax.speech.synthesis.Voice;
+
+import org.apache.log4j.Logger;
+
+
 import com.sun.speech.freetts.jsapi.FreeTTSEngineCentral; 
 
 /// Handles all speech synthesis (i.e. text-to-speech) 
 /// functions.
 public class SpeechSynthesizer
 {
+	private static final Logger logger = Logger.getLogger(SpeechSynthesizer.class);
+	
 	/// The speech Synthesizer instance.
 	private Synthesizer mSynthesizer = null;
 
@@ -70,7 +76,7 @@ public class SpeechSynthesizer
 
 			if (null  == mSynthesizer)
 			{
-				Utils.log("ERROR", "Cannot create speech synthesizer");
+				logger.error("Cannot create speech synthesizer");
 				System.exit(1);
 			}
 
