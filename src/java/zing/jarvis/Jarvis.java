@@ -8,52 +8,81 @@ import edu.cmu.sphinx.result.Result;
 import edu.cmu.sphinx.util.props.ConfigurationManager;
 
 /**
- * uses the Sphinx-4 endpointer, which automatically segments incoming audio
- * into utterances and silences.
+ * Uses the Sphinx-4 endpointer, which automatically segments incoming audio into utterances and
+ * silences.
+ * 
+ * @author AJ Minich (aj@ajminich.com)
  */
 public class Jarvis {
 
-	private static final Logger logger = Logger.getLogger(Jarvis.class);
+  private static final Logger logger = Logger.getLogger(Jarvis.class);
 
-	public static void main(String[] args) {
-		ConfigurationManager cm;
+  // Constants
+  public static final String CONFIG_FILE = "src/resources/sphinx.config.xml";
 
-		if (args.length > 0) {
-			cm = new ConfigurationManager(args[0]);
-		} else {
-			cm = new ConfigurationManager("config/sphinx.config.xml");
-		}
+  // Private members
+  private final ConfigurationManager cm;
+  private Recognizer recognizer;
 
-		Recognizer recognizer = (Recognizer) cm.lookup("recognizer");
-		recognizer.allocate();
+  public static void main(String[] args) {
+    
+    String configFile = (args.length > 0) ? args[0] : CONFIG_FILE;
+    
+    Jarvis jarvis;
+    try {
+      jarvis = new Jarvis(configFile);
+    } catch (Exception ex) {
+      logger.error(ex);
+      return;
+    }
 
-		// start the microphone or exit if the programm if this is not possible
-		Microphone microphone = (Microphone) cm.lookup("microphone");
-		if (!microphone.startRecording()) {
-			logger.error("Cannot start microphone.");
-			recognizer.deallocate();
-			System.exit(1);
-		}
+    // loop recognition until the user gives the 'shutdown' command.
+    while (true) {
 
-		logger.info("Jarvis online. Good morning, sir.");
-		
-		// loop the recognition until the programm exits.
-		while (true) {
-			Result result = recognizer.recognize();
+      String command = jarvis.getCommand();
 
-			if (result != null) {
-				String resultText = result.getBestFinalResultNoFiller();
+      if (command.equals("shutdown")) {
+        logger.info("Shutting down.");
+        break;
+      }
 
-				if (resultText.equals("shutdown")) {
-					logger.info("Shutting down.");
-					break;
-				}
+      logger.info("Command received: '" + command + "'.");
+    }
+    
+    System.exit(0);
+  }
 
-				logger.info("Command received: '" + resultText + "'.");
-			}
-		}
+  public Jarvis(String sphinxConfigFile) throws Exception {
 
-		recognizer.deallocate();
-		System.exit(0);
-	}
+    cm = new ConfigurationManager(sphinxConfigFile);
+
+    recognizer = (Recognizer) cm.lookup("recognizer");
+    recognizer.allocate();
+
+    // start the microphone or exit if the program if this is not possible
+    Microphone microphone = (Microphone) cm.lookup("microphone");
+    if (!microphone.startRecording()) {
+      recognizer.deallocate();
+      throw new Exception("Cannot start microphone.");
+    }
+
+    logger.info("Jarvis online. Good morning, sir.");
+  }
+
+  public String getCommand() {
+
+    Result result = null;
+
+    // continue recognition until the user gives a recognized command
+    while (result == null) {
+      result = recognizer.recognize();
+    }
+
+    String resultText = result.getBestFinalResultNoFiller();
+    return resultText;
+  }
+
+  public void shutdown() {
+    recognizer.deallocate();
+  }
 }
