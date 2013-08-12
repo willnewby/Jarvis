@@ -7,4 +7,4 @@ AJ Minich
 
 A text and speech recognition-based personal assistant.
 
-.. _Project Site: http://projects.ajminich.com/index.php?title=Jarvis
+.. _Project Site: http://ajminich.com/projects/jarvis/
