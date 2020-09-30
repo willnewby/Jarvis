@@ -1,119 +1,109 @@
-#!/usr/bin/python
-# -*- coding: koi8-r -*-
-# $Id: bot.py,v 1.2 2006/10/06 12:30:42 normanr Exp $
-# Based on framework at http://xmpppy.sourceforge.net/examples/bot.py
-import sys
-import xmpp
-import commands
-import logging
+import pyttsx3 #pip install pyttsx3
+import speech_recognition as sr #pip install speechRecognition
+import datetime
+import wikipedia #pip install wikipedia
+import webbrowser
 import os
+import smtplib
 
-class Jarvis:
+engine = pyttsx3.init('sapi5')
+voices = engine.getProperty('voices')
+# print(voices[1].id)
+engine.setProperty('voice', voices[0].id)
 
-    __LOG_LOCATION__ = "log/jarvis.log"
 
-    def __init__(self):
+def speak(audio):
+    engine.say(audio)
+    engine.runAndWait()
 
-        # Status indicating whether to continue
-        # It's not threadsafe, but whatever
-        self.status = True
 
-        self.__setupLogger__()
+def wishMe():
+    hour = int(datetime.datetime.now().hour)
+    if hour>=0 and hour<12:
+        speak("Good Morning!")
 
-        # Set up processor
-        self.processor = commands.MessageProcessor(self.logger)
+    elif hour>=12 and hour<18:
+        speak("Good Afternoon!")   
 
-    def __setupLogger__(self):
-
-        self.logger = logging.getLogger('Jarvis')
-        self.logger.setLevel(logging.DEBUG)
-
-        # Log formatting
-        formatter = logging.Formatter('%(asctime)s\t%(name)s\t%(levelname)s\t%(message)s')
-
-        # Console handler
-        ch = logging.StreamHandler()
-        ch.setFormatter(formatter)
-        self.logger.addHandler(ch)
-
-        # Logfile handler
-        dir = os.path.dirname(self.__LOG_LOCATION__)
-        if not os.path.exists(dir):
-            os.makedirs(dir)
-
-        fh = logging.FileHandler(self.__LOG_LOCATION__)
-        fh.setFormatter(formatter)
-        self.logger.addHandler(fh)
-
-    def connect(self, username, password):
-
-        # Create the connection
-        jid = xmpp.protocol.JID(username)
-        user = jid.getNode()
-        server = jid.getDomain()
-
-        self.conn = xmpp.Client(server,debug=[])
-        conres = self.conn.connect(("talk.google.com", 5222))
-
-        if not conres:
-            self.logger.error("Unable to connect to server %s!" % server)
-            sys.exit(1)
-        if conres<>'tls':
-            self.logger.warn("Unable to estabilish secure connection - TLS failed!")
-
-        authres = self.conn.auth(user, password)
-
-        if not authres:
-            self.logger.error("Unable to authorize on %s - check login/password." % server)
-            sys.exit(1)
-        if authres<>'sasl':
-            self.logger.warn("Warning: unable to perform SASL auth os %s. Old authentication method used!" % server)
-
-        self.logger.info("Connection established.")
-
-    # Bot message processor
-    def messageHandler(self, conn, message):
-
-        (reply, sendMessage, shutdown) = self.processor.getResponse(message)
-
-        if sendMessage:
-            conn.send(xmpp.Message(message.getFrom(), reply))
-
-        if shutdown:
-            self.status = False
-
-    def initiate(self):
-
-        # Initiate the message handler
-        self.conn.RegisterHandler('message', self.messageHandler)
-
-        # Put bot online
-        self.conn.sendInitPresence()
-
-        self.logger.info("Initiated.")
-
-        while self.status:
-            try:
-                self.conn.Process(1)
-            except KeyboardInterrupt:
-                self.status = False
-
-        self.logger.info("Shutdown complete.")
-
-if __name__ == '__main__':
-
-    if len(sys.argv)<3:
-        print "Usage: jarvis.py username@server.net password"
-        logger.error("Not enough arguments specified.")
     else:
+        speak("Good Evening!")  
 
-        username = sys.argv[1]
-        password = sys.argv[2]
+    speak("I am Jarvis Sir. Please tell me how may I help you")       
 
-        jarvisBot  = Jarvis()
+def takeCommand():
+    #It takes microphone input from the user and returns string output
 
-        # Initiate connection
-        jarvisBot.connect(username, password)
+    r = sr.Recognizer()
+    with sr.Microphone() as source:
+        print("Listening...")
+        r.pause_threshold = 1
+        audio = r.listen(source)
 
-        # Begin the service iterator to keep the bot going until the close message is received
-        jarvisBot.initiate()
+    try:
+        print("Recognizing...")    
+        query = r.recognize_google(audio, language='en-in')
+        print(f"User said: {query}\n")
+
+    except Exception as e:
+        # print(e)    
+        print("Say that again please...")  
+        return "None"
+    return query
+
+def sendEmail(to, content):
+    server = smtplib.SMTP('smtp.gmail.com', 587)
+    server.ehlo()
+    server.starttls()
+    server.login('youremail@gmail.com', 'your-password')
+    server.sendmail('youremail@gmail.com', to, content)
+    server.close()
+
+if __name__ == "__main__":
+    wishMe()
+    while True:
+    # if 1:
+        query = takeCommand().lower()
+
+        # Logic for executing tasks based on query
+        if 'wikipedia' in query:
+            speak('Searching Wikipedia...')
+            query = query.replace("wikipedia", "")
+            results = wikipedia.summary(query, sentences=2)
+            speak("According to Wikipedia")
+            print(results)
+            speak(results)
+
+        elif 'open youtube' in query:
+            webbrowser.open("youtube.com")
+
+        elif 'open google' in query:
+            webbrowser.open("google.com")
+
+        elif 'open stackoverflow' in query:
+            webbrowser.open("stackoverflow.com")   
+
+
+        elif 'play music' in query:
+            music_dir = 'D:\\Non Critical\\songs\\Favorite Songs2' #Your Music Directory
+            songs = os.listdir(music_dir)
+            print(songs)    
+            os.startfile(os.path.join(music_dir, songs[0]))
+
+        elif 'the time' in query:
+            strTime = datetime.datetime.now().strftime("%H:%M:%S")    
+            speak(f"Sir, the time is {strTime}")
+
+        elif 'open code' in query:
+            codePath = "C:\\Users\\Rudra Vyas\\AppData\\Local\\Programs\\Microsoft VS Code\\Code.exe"
+            os.startfile(codePath)
+
+        elif 'email to harry' in query:
+            try:
+                speak("What should I say?")
+                content = takeCommand()
+                to = "rudrayourEmail@gmail.com"    
+                sendEmail(to, content)
+                speak("Email has been sent!")
+            except Exception as e:
+                print(e)
+                speak("Sorry my friend harry bhai. I am not able to send this email")
