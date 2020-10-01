@@ -1,69 +1,110 @@
-Project Jarvis
-==============
+# AI Virtual Assistant Jarvis in Python
+import pyttsx3     #pip install pyttsx3
+import speech_recognition as sr          #pip install speech_recognition
+import datetime            
+import wikipedia                       #pip install wikipedia
+import webbrowser
+import os
+import smtplib               #pip install smtplib
 
-`AJ Minich`_
+engine = pyttsx3.init('sapi5')
+voices = engine.getProperty('voices')
+engine.setProperty('voice', voices[0].id)
 
-Jarvis is a personal assistant that uses natural language processing and a database 
-of pre-programmed functionality to respond to user requests. Jarvis is driven by a 
-Java-based backend that performs core operations, and can be used through various 
-interfaces.
 
-Jarvis is named after Tony Stark's automated assistant in the *Ironman_* series.
+def speak(audio):
+    engine.say(audio)
+    engine.runAndWait()
 
-Plans
------
 
-The following are on my list of things to implement:
+def wishMe():
+    hour = int(datetime.datetime.now().hour)
+    if hour>=0 and hour<12:
+        speak("Good Morning!")
 
-* Console
+    elif hour>=12 and hour<18:
+        speak("Good Afternoon!")   
 
-  * run in background
+    else:
+        speak("Good Evening!")  
 
-  * incorporate Jarvis into the login and logout functions
-  
-  * have Jarvis warn if any of the directories are getting full (df -h)
-  
-  * more importantly: make it possible to tell Jarvis to shut up
+    speak("I am Jarvis Sir. Please tell me how may I help you")       
 
-* Centralization
+def takeCommand():
+    #It takes microphone input from the user and returns string output
 
-  * always available online
+    r = sr.Recognizer()
+    with sr.Microphone() as source:
+        print("Listening...")
+        r.pause_threshold = 1
+        audio = r.listen(source)
 
-  * all clients interact through a REST interface with a single instance
+    try:
+        print("Recognizing...")    
+        query = r.recognize_google(audio, language='en-in')
+        print(f"User said: {query}\n")
 
-* Engine
+    except Exception as e:
+        # print(e)    
+        print("Say that again please...")  
+        return "None"
+    return query
 
-  * bring in the NLP software from http://nlp.stanford.edu/software/index.shtml
+def sendEmail(to, content):
+    server = smtplib.SMTP('smtp.gmail.com', 587)
+    server.ehlo()
+    server.starttls()
+    server.login('Enter you email','Enter your password')    #Enter you email , Enter your email addess password
+    server.sendmail('Enter your email, to, content')
+    server.close()
 
-  * allow basic commands to be parsed and responded to
+if __name__ == "__main__":
+    wishMe()
+    while True:
+    # if 1:
+        query = takeCommand().lower()
 
-  * consider using data from Freebase Quad Dump (http://aws.amazon.com/datasets/2052645406658757)
+        # Logic for executing tasks based on query
+        if 'wikipedia' in query:
+            speak('Searching Wikipedia...')
+            query = query.replace("wikipedia", "")
+            results = wikipedia.summary(query, sentences=2)
+            speak("According to Wikipedia")
+            print(results)
+            speak(results)
 
-* voice interface
+        elif 'open youtube' in query:
+            webbrowser.open("youtube.com")
 
-  * consider bringing in soundbites from http://www.wavsource.com/movies/iron_man.htm
+        elif 'open google' in query:
+            webbrowser.open("google.com")
 
-Architecture
-------------
+        elif 'open stackoverflow' in query:
+            webbrowser.open("stackoverflow.com")   
 
-The initial parsing engine will be simple. In fact, the first version will be pretty 
-much just a command-line abstraction layer that reduces the need to type commands exactly.
 
-The operations will be:
+        elif 'play music' in query:
+            music_dir = 'c:\\Users\\Anshul-Priyanshu\\Music'  # Enter the path of your music library
+            songs = os.listdir(music_dir)
+            print(songs)    
+            os.startfile(os.path.join(music_dir, songs[0]))
 
-* Determine the action
-* Determine the object
-* Look through the database of available operations, and determine if any of them match the action and the object
-  
-  * action: "open", "close", "delete"
+        elif 'the time' in query:
+            strTime = datetime.datetime.now().strftime("%H:%M:%S")    
+            speak(f"Sir, the time is {strTime}")
 
-Behavior
---------
+        elif 'open code' in query:
+            codePath = "C:\\Users\\Anshul-Priyanshu\\AppData\\Local\\Programs\\Microsoft VS Code\\Code.exe" #Enter the path of your IDE
+            os.startfile(codePath)
 
-Here are some examples of anticipated behavior::
+        elif 'email to Mom' in query: 
+            try:
+                speak("What should I say?")
+                content = takeCommand()
+                to = "Your email"  #Enter your mom's and friends email address
+                sendEmail(to, content)
+                speak("Email has been sent!")
+            except Exception as e:
+                print(e)
+                speak("Sorry my Sir . I am not able to send this email")    
 
-  > jarvis
-  Yes sir?
-
-.. _AJ Minich: http://ajminich.com/projects
-.. _Ironman: http://en.wikipedia.org/wiki/Edwin_Jarvis#Film
