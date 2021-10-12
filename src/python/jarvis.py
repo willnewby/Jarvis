@@ -104,7 +104,7 @@ if __name__ == '__main__':
 
     if len(sys.argv)<3:
         print "Usage: jarvis.py username@server.net password"
-        logger.error("Not enough arguments specified.")
+        logger.error("Not enough arguments specified.\nPlease specify appropriate arguments")
     else:
 
         username = sys.argv[1]
